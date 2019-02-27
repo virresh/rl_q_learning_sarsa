@@ -12,6 +12,7 @@ class Agent(object):
         else:
             self.Q = np.zeros((n*m, action_space.n))
         self.action_space = action_space
+        self.action_taken = None
         self.previous_state = None
         self.epsilon = 0.8  # Exploration vs Exploitation
         self.alpha = 0.8    # Learning rate
@@ -69,3 +70,29 @@ class Agent(object):
 
     def save_table(self, file):
         pickle.dump(self.Q, file)
+
+class  SARSAAgent(Agent):
+    """ Implements SARSA algorithm"""
+    def __init__(self, *args, **kwargs):
+        super( SARSAAgent, self).__init__(*args, **kwargs)
+        self.previous_state_2 = None
+        self.action_taken_2 = None
+        self.prev_rew = None
+
+    def act(self, state, policy):
+        self.previous_state_2 = self.previous_state
+        self.action_taken_2 = self.action_taken
+        act = super(SARSAAgent, self).act(state, policy)
+        return act
+
+    def learn(self, state, reward):
+        if self.previous_state != None and self.previous_state_2 != None and self.prev_rew != None:
+            future = self.previous_state
+            future_act = self.action_taken
+            current = self.previous_state_2
+            current_act = self.action_taken_2
+
+            prev_val = self.Q[current, current_act]
+            new_val = self.prev_rew + self.gamma * self.Q[future, future_act]
+            self.Q[current, current_act] += self.alpha * (new_val - prev_val)
+        self.prev_rew = reward

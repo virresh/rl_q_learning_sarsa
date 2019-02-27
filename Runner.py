@@ -3,7 +3,7 @@ import gym_maze
 import matplotlib.pyplot as plt
 import numpy as np
 
-from Agent import Agent
+from Agent import Agent, SARSAAgent
 
 RENDER_MAZE = True
 
@@ -58,7 +58,8 @@ def main(agent_class, train=False, load_file=None, policy=None,
 	# Do for these many epochs
 	for i in range(EPOCHS):
 		state = env.reset()
-		# env.render()
+		if RENDER_MAZE:
+			env.render()
 		done = False
 		total_reward = 0
 		for t in range(MAX_T):
@@ -74,10 +75,9 @@ def main(agent_class, train=False, load_file=None, policy=None,
 			print('Episode', i, 'ended in ', t, 'time steps with ', total_reward, 'reward')
 		agent.end_episode()
 		if state1 != None:
-			STATE_TREND1.append(agent.Q[state1, :])
-			print(agent.Q[state1, :])
+			STATE_TREND1.append(list(agent.Q[state1]))
 		if state2 != None:
-			STATE_TREND2.append(agent.Q[state2, :])
+			STATE_TREND2.append(list(agent.Q[state2]))
 		TOTAL_REWARD.append(total_reward)
 		TIME_TAKEN.append(t)
 		EPSILON_VALS.append(agent.epsilon)
@@ -129,7 +129,7 @@ def find_converge_time(values):
 	return len(values)
 
 if __name__ == '__main__':
-	RENDER_MAZE = False
+	RENDER_MAZE = True
 
 	def zero_eps(self):
 		self.epsilon = 0
@@ -180,18 +180,21 @@ if __name__ == '__main__':
 
 	## Part C
 	# Observe probability of start state (i.e 0,0)
-	main(Agent, train=True, EPOCHS=50, MAX_T_MULT=8, upd_eps=zero_eps, state1=10, initial_eps=0)
-	# plot_graph('Q-Learning, Episodic Alpha decay, No explore')
-	arr = np.array(STATE_TREND1)
-	print(STATE_TREND1[0][0], arr[0][0])
-	print(arr.shape)
-	# print(arr)
-	fig, axs = plt.subplots(2,2, constrained_layout=True)
-	axs[0][0].plot(arr[:,0])
-	axs[0][1].plot(arr[:,1])
-	axs[1][0].plot(arr[:,2])
-	axs[1][1].plot(arr[:,3])
-	plt.show()
+	# main(Agent, train=True, EPOCHS=50, MAX_T_MULT=8, upd_eps=zero_eps, state1=1, initial_eps=0)
+	# arr = np.array(STATE_TREND1)
+	# fig, axs = plt.subplots(2,2, constrained_layout=True)
+	# axs[0][0].plot(arr[:,0])
+	# axs[0][0].set_title('0')
+	# axs[0][1].plot(arr[:,1])
+	# axs[0][1].set_title('1')
+	# axs[1][0].plot(arr[:,2])
+	# axs[1][0].set_title('2')
+	# axs[1][1].plot(arr[:,3])
+	# axs[1][1].set_title('3')
+	# print(arr.shape)
+	# plt.show()
+	# # RENDER_MAZE = True
+	# # main(Agent, train=False, EPOCHS=100, MAX_T_MULT=8, load_file='maze_agent.pkl')
 
 	## Part D
 	# Effect of Espsilon
@@ -205,5 +208,50 @@ if __name__ == '__main__':
 	# plt.title('Convergence time vs Epsilon')
 	# plt.show()
 
-	# main(Agent, train=True, load_file='maze_agent.pkl')
+	## Part E
+	# Train on best parameters
+	# RENDER_MAZE = False
+	# main(Agent, train=True, EPOCHS=50, MAX_T_MULT=8, initial_alpha=0.8, initial_gamma=0.99, initial_eps=0.01, upd_eps=constant, upd_alpha=constant, policy='eps_greedy', silent=True)
+
+	# # Test on best Parameters
+	# # RENDER_MAZE = True
+	# main(Agent, train=False, load_file='maze_agent.pkl', EPOCHS=50, MAX_T_MULT=8, initial_alpha=0.8, initial_gamma=0.99, initial_eps=0.01, upd_eps=constant, upd_alpha=constant, policy='eps_greedy')
+	# plot_graph('Q-Learning, Best Parameters')
+
+	# # Test intermediate states
+	# main(Agent, train=True, EPOCHS=50, MAX_T_MULT=8, upd_eps=zero_eps, state1=0, state2=10, initial_eps=0)
+	# arr = np.array(STATE_TREND1)
+	# fig, axs = plt.subplots(2,2, constrained_layout=True)
+	# axs[0][0].plot(arr[:,0])
+	# axs[0][0].set_title('0')
+	# axs[0][1].plot(arr[:,1])
+	# axs[0][1].set_title('1')
+	# axs[1][0].plot(arr[:,2])
+	# axs[1][0].set_title('2')
+	# axs[1][1].plot(arr[:,3])
+	# axs[1][1].set_title('3')
+	# print(arr.shape)
+
+	# arr2 = np.array(STATE_TREND2)
+	# fig, axs = plt.subplots(2,2, constrained_layout=True)
+	# axs[0][0].plot(arr2[:,0])
+	# axs[0][0].set_title('0')
+	# axs[0][1].plot(arr2[:,1])
+	# axs[0][1].set_title('1')
+	# axs[1][0].plot(arr2[:,2])
+	# axs[1][0].set_title('2')
+	# axs[1][1].plot(arr2[:,3])
+	# axs[1][1].set_title('3')
+	# print(arr2.shape)
+	# plt.show()
+
+	# Question 4
+	# Test on another maze env
+	# main(Agent, ENV_STR='maze-random-5x5-v0', train=True, load_file='maze_agent.pkl')
+	# plot_graph('Q-Learning, Best Parameters')
+
+	# ## Bonus
+	main(SARSAAgent, train=True, EPOCHS=50, MAX_T_MULT=8)
+	plot_graph('SARSA Overview')
+	
 	# main(Agent, train=False, load_file='maze_agent.pkl')
